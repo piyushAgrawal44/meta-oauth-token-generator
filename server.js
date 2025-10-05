@@ -1,30 +1,21 @@
 require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
-const winston = require('winston');
 const cors = require('cors');
 const { MongoClient } = require('mongodb');
 
-// Winston Logger Configuration
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.errors({ stack: true }),
-    winston.format.json()
-  ),
-  defaultMeta: { service: 'meta-ads-tracker' },
-  transports: [
-    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'logs/combined.log' }),
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    })
-  ]
-});
+// Simple logger utility for Vercel compatibility
+const logger = {
+  info: (message, meta = {}) => {
+    console.log(`[INFO] ${new Date().toISOString()} - ${message}`, meta);
+  },
+  error: (message, meta = {}) => {
+    console.error(`[ERROR] ${new Date().toISOString()} - ${message}`, meta);
+  },
+  warn: (message, meta = {}) => {
+    console.warn(`[WARN] ${new Date().toISOString()} - ${message}`, meta);
+  }
+};
 
 const app = express();
 const PORT = process.env.PORT || 3000;
