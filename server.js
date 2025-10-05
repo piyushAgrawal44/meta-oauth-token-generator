@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
+const path = require('path');
 const { MongoClient } = require('mongodb');
 
 // Simple logger utility for Vercel compatibility
@@ -177,6 +178,33 @@ app.get('/', (req, res) => {
   });
 });
 
+// Privacy Policy endpoint (required by Meta)
+app.get('/privacy-policy', (req, res) => {
+  try {
+    logger.info('Privacy policy page accessed');
+    res.sendFile(path.join(__dirname, 'privacy-policy.html'));
+  } catch (error) {
+    logger.error('Error serving privacy policy:', error.message);
+    res.status(500).json({ error: 'Failed to load privacy policy' });
+  }
+});
+
+// App Details endpoint (required by Meta)
+app.get('/app-details', (req, res) => {
+  try {
+    logger.info('App details page accessed');
+    res.sendFile(path.join(__dirname, 'app-details.html'));
+  } catch (error) {
+    logger.error('Error serving app details:', error.message);
+    res.status(500).json({ error: 'Failed to load app details' });
+  }
+});
+
+// Terms of Service endpoint (alias for app details)
+app.get('/terms', (req, res) => {
+  res.redirect('/app-details');
+});
+
 // Generate OAuth URL endpoint (helper for clients)
 app.get('/meta/auth/url', (req, res) => {
   try {
@@ -189,7 +217,9 @@ app.get('/meta/auth/url', (req, res) => {
     logger.info('Generated OAuth URL for client');
     res.json({ 
       oauth_url: oauthUrl,
-      message: 'Send this URL to your client to authorize access'
+      message: 'Send this URL to your client to authorize access',
+      privacy_policy: `${req.protocol}://${req.get('host')}/privacy-policy`,
+      app_details: `${req.protocol}://${req.get('host')}/app-details`
     });
   } catch (error) {
     logger.error('Error generating OAuth URL:', error.message);
